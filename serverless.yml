@@ -1,0 +1,30 @@
+service: kpi-api
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+  - serverless-plugin-typescript
+
+custom:
+  dotenv:
+    path: ./.env
+
+functions:
+  peopleAnalytics:
+    handler: src/functions/handler.peopleAnalytics
+    timeout: 60
+    events:
+      - httpApi:
+          path: /
+          method: get
+    vpc:
+      securityGroupIds:
+        - sg-019706310087611af
+      subnetIds:
+        - subnet-096db7536a0def1eb
+

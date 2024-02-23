@@ -1,0 +1,16 @@
+# Use postgres/example user/password credentials
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    volumes:
+      - ./mocks/database/01-create-db.sql:/docker-entrypoint-initdb.d/01-create-db.sql
+      - ./mocks/database/02-populate-db.sql:/docker-entrypoint-initdb.d/02-populate-db.sql
+    environment:
+      POSTGRES_PASSWORD: my-secret
+    ports:
+      - "5432:5432"

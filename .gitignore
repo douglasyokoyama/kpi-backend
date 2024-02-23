@@ -1,0 +1,11 @@
+# Environment file
+.env*
+!.env.example
+.build
+
+# package directories
+node_modules
+jspm_packages
+
+# Serverless directories
+.serverless

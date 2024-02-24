@@ -3,12 +3,18 @@ import { Sequelize } from 'sequelize';
 export const loadSequelize = async (): Promise<Sequelize> => {
   const database = process.env.DB_NAME ?? '';
   const username = process.env.DB_USER ?? '';
-  const password = process.env.DB_PASS;
+  const password = process.env.DB_PASS ;
 
   const sequelize = new Sequelize(database, username, password, {
     host: process.env.DB_HOST,
     port: parseInt(process.env.DB_PORT ?? '5432'),
     dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
     pool: {
       max: 2,
       min: 0,
@@ -19,7 +25,7 @@ export const loadSequelize = async (): Promise<Sequelize> => {
   });
   try {
     await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
+    console.info('Connection has been established successfully.');
   } catch (error) {
     console.error('Unable to connect to the database:', error);
   }

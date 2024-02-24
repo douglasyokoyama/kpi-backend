@@ -90,6 +90,13 @@ export const peopleAnalytics = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   const { email } = event.queryStringParameters ?? {};
+  console.info('fetch people analytics for', email);
+  if (!email) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: 'email required' }, null, 2),
+    };
+  }
 
   sequelize = await getConnection(sequelize);
 
@@ -101,25 +108,41 @@ export const peopleAnalytics = async (
   }> = [];
 
   try {
+    const user = await sequelize.query(
+      'SELECT * FROM funcionarios WHERE email = ?',
+      {
+        replacements: [email],
+        type: QueryTypes.SELECT,
+      },
+    );
+    if (user.length === 0) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ message: 'user not found' }, null, 2),
+      };
+    }
     records = await sequelize.query(SQL_HIERARCHY, {
       replacements: [email],
       type: QueryTypes.SELECT,
     });
+    const { headcountMensal, turnoverMensal } = parseRecords(records);
+
+    const response = {
+      headcountMensal,
+      turnoverMensal,
+    };
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(response, null, 2),
+    };
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    return {
+      statusCode: 404,
+      body: JSON.stringify({ message: JSON.stringify(error) }, null, 2),
+    };
   } finally {
     await sequelize.connectionManager.close();
   }
-
-  const { headcountMensal, turnoverMensal } = parseRecords(records);
-
-  const response = {
-    headcountMensal,
-    turnoverMensal,
-  };
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(response, null, 2),
-  };
 };

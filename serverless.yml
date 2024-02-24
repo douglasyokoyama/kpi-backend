@@ -4,6 +4,15 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs20.x
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "rds:DescribeDBInstances"
+            - "rds:CreateDBInstance"
+            - "rds:DeleteDBInstance"
+          Resource: "arn:aws:rds:us-east-1:503474278931:db:database-1"
 
 plugins:
   - serverless-offline
@@ -12,12 +21,15 @@ plugins:
 
 custom:
   dotenv:
-    path: ./.env
+    path: ./${opt:stage, ''}.env
+
+package:
+  individually: true
 
 functions:
   peopleAnalytics:
     handler: src/functions/handler.peopleAnalytics
-    timeout: 60
+    timeout: 6
     events:
       - httpApi:
           path: /
